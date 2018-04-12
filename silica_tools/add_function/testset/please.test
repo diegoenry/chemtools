@@ -1,0 +1,1 @@
+../add_function -i step13.coor -p step14.psf -o aews.pdb -op aews.psf -fgroup fms.pdb

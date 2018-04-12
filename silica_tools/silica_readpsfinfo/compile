@@ -1,0 +1,1 @@
+gfortran -O3 -ffree-line-length-none -fbackslash silica_readpsfinfo.f90 -o readpsfinfo

@@ -1,0 +1,15 @@
+gfortran -o add_function \
+-O3 -ffree-line-length-none -fbackslash \
+user_interface.f90              \
+add_function.f90                \
+atom_type_from_psf.f90          \
+init_pdb.f90                    \
+psf_stuff.f90                   \
+read_functional_group.f90       \
+rotate_mol.f90                  \
+functions.f90       
+
+# removed
+#quick_read_pdb.f90              \
+#atom_type.f90                   \
+#

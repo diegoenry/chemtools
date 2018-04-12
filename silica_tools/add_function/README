@@ -1,0 +1,17 @@
+add_function_v10.2
+Existe um bug que volta a contagem do numero de residuos a partir do 999 e vai p 100
+Fiz a modificação no formato de read/write .psf no arquivo add_function.f90 lá no final
+
+
+Changelog
+
+add_function_v9
+
+Reorganizei o codigo, criando arquivos separados para as rotinas e tudo ficou mais simples.
+
+1) Interface com o usuario
+O principal arquivo e o .psf onde se encontra a informacao do hidrogenio que eu quero substituir
+pelo "fgroup"
+
+
+

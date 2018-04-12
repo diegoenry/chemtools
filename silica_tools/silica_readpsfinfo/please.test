@@ -1,0 +1,7 @@
+gfortran -O3 -ffree-line-length-none -fbackslash silica_readpsfinfo.f90 -o readpsfinfo
+./readpsfinfo <<EOF
+testset1.psf
+testset2.psf
+EOF
+
+#diff --text --report-identical-files mergedstructure.psf testset.reference.psf

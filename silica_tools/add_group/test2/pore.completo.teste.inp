@@ -1,0 +1,122 @@
+BONDS
+!
+!V(bond) = Kb(b - b0)**2
+!
+!Kb: kcal/mole/A**2
+!b0: A
+!
+!atom type Kb          b0
+!
+
+!silicon section (experimental alek@ks.uiuc.edu)
+
+SI SI 0.0  0.0
+SI O  885.1 1.61
+O  SI 885.1 1.61
+O  H  450.0 0.9572
+H  O  450.0 0.9572
+C  O  885.1 1.61
+C  C  885.1 1.61
+CH2  O  885.1 1.61
+CH2  C  885.1 1.61
+CH2  CH2  885.1 1.61
+
+ANGLES
+!
+!V(angle) = Ktheta(Theta - Theta0)**2
+!
+!V(Urey-Bradley) = Kub(S - S0)**2
+!
+!Ktheta: kcal/mole/rad**2
+!Theta0: degrees
+!Kub: kcal/mole/A**2 (Urey-Bradley)
+!S0: A
+!
+!atom types     Ktheta    Theta0   Kub     S0
+!
+!silicon section (experimental alek@ks.uiuc.edu)
+
+SI    O   SI  4.66  174.22
+O    SI   O  159.57 110.93
+SI    O   H   55.00 104.52
+H     O   SI  55.00 104.52
+C     O   SI  55.00 104.52
+O     C   O   55.00 104.52
+C     C   C   55.00 104.52
+SI    SI  SI   0.00   0.00
+CH2   O   SI  55.00 104.52
+CH2   O   H   55.00 104.52
+CH2  CH2  O   55.00 104.52
+CH2  CH2  CH2 55.00 104.52
+C    CH2  CH2 55.00 104.52
+O      C  CH2 55.00 104.52
+
+
+DIHEDRALS
+!
+!V(dihedral) = Kchi(1 + cos(n(chi) - delta))
+!
+!Kchi: kcal/mole
+!n: multiplicity
+!delta: degrees
+!
+!atom types             Kchi    n   delta
+!
+H    O  SI   CH2      1.3300  1   180.00 ! ALLOW ALC
+H    O  SI   CH2      0.1800  2   180.00 ! ALLOW ALC
+H    O  SI   CH2      0.3200  3   180.00 ! ALLOW ALC
+H    O  SI     O      1.3300  1   180.00 ! ALLOW ALC
+H    O  SI     O      0.1800  2   180.00 ! ALLOW ALC
+H    O  SI     O      0.3200  3   180.00 ! ALLOW ALC
+H    O  CH2  CH2      1.3300  1   180.00 ! ALLOW ALC
+H    O  CH2  CH2      0.1800  2   180.00 ! ALLOW ALC
+H    O  CH2  CH2      0.3200  3   180.00 ! ALLOW ALC
+H    O  SI     O      1.3300  1   180.00 ! ALLOW ALC
+H    O  SI     O      0.1800  2   180.00 ! ALLOW ALC
+H    O  SI     O      0.3200  3   180.00 ! ALLOW ALC
+SI   O  SI     O      1.3300  1   180.00 ! ALLOW ALC
+SI   O  SI     O      0.1800  2   180.00 ! ALLOW ALC
+SI   O  SI     O      0.3200  3   180.00 ! ALLOW ALC
+SI   O  CH2  CH2      1.3300  1   180.00 ! ALLOW ALC
+SI   O  CH2  CH2      0.1800  2   180.00 ! ALLOW ALC
+SI   O  CH2  CH2      0.3200  3   180.00 ! ALLOW ALC
+SI   O  CH2    O      1.3300  1   180.00 ! ALLOW ALC
+SI   O  CH2    O      0.1800  2   180.00 ! ALLOW ALC
+SI   O  CH2    O      0.3200  3   180.00 ! ALLOW ALC
+CH2  O  SI     O      1.3300  1   180.00 ! ALLOW ALC
+CH2  O  SI     O      0.1800  2   180.00 ! ALLOW ALC
+CH2  O  SI     O      0.3200  3   180.00 ! ALLOW ALC
+CH2  CH2 CH2   O      1.3300  1   180.00 ! ALLOW ALC
+CH2  CH2 CH2   O      0.1800  2   180.00 ! ALLOW ALC
+CH2  CH2 CH2   O      0.3200  3   180.00 ! ALLOW ALC
+CH2  CH2 CH2   C      1.3300  1   180.00 ! ALLOW ALC
+CH2  CH2 CH2   C      0.1800  2   180.00 ! ALLOW ALC
+CH2  CH2 CH2   C      0.3200  3   180.00 ! ALLOW ALC
+CH2  CH2 C     O      1.3300  1   180.00 ! ALLOW ALC
+CH2  CH2 C     O      0.1800  2   180.00 ! ALLOW ALC
+CH2  CH2 C     O      0.3200  3   180.00 ! ALLOW ALC
+!
+
+NONBONDED nbxmod  5 atom cdiel shift vatom vdistance vswitch -
+cutnb 14.0 ctofnb 12.0 ctonnb 10.0 eps 1.0 e14fac 1.0 wmin 1.5 
+                !adm jr., 5/08/91, suggested cutoff scheme
+!
+!V(Lennard-Jones) = Eps,i,j[(Rmin,i,j/ri,j)**12 - 2(Rmin,i,j/ri,j)**6]
+!
+!epsilon: kcal/mole, Eps,i,j = sqrt(eps,i * eps,j)
+!Rmin/2: A, Rmin,i,j = Rmin/2,i + Rmin/2,j
+!
+!atom  ignored    epsilon      Rmin/2   ignored   eps,1-4       Rmin/2,1-4
+!
+
+O         0.0       -0.1500     1.7500     0.000000   -0.1500      1.7500   
+SI        0.0       -0.3000     2.1475     0.000000   -0.3000      2.1475
+H         0.0       -0.0460     0.2245     0.000000   -0.0460      0.2245
+C         0.0       -0.1500     1.7500     0.000000   -0.1500      1.7500
+CH2       0.0       -0.1500     1.7500     0.000000   -0.1500      1.7500
+
+HBOND CUTHB 0.5  ! If you want to do hbond analysis (only), then use
+                 ! READ PARAM APPEND CARD
+                 ! to append hbond parameters from the file: par_hbond.inp
+
+END

@@ -1,0 +1,48 @@
+! from supplementary material of:
+! Lorenz, C. D.; Crozier, P. S.; Anderson, J. A. & Travesset, A. 
+! Molecular Dynamics of Ionic Transport and Electrokinetic Effects in Realistic Silica Channels
+! The Journal of Physical Chemistry C, 2008, 112, 10222-10232 
+! and inorganic builder: 
+!silicon section (experimental alek@ks.uiuc.edu)
+
+! ATOMS
+! Bulk silicon      SI
+! Bulk oxygen       Ob
+! Silanol silicon   SI
+! Silanol oxygen    Os
+! Silanol Hydrogen  Hs
+! Water oxygen      Ow
+! Water hydrogen    Hw
+
+BONDS
+SI  Ob    885.10  1.61
+SI  Os    428.00  1.42
+Os  Hs    545.00  0.96
+SI  O     885.10  1.61
+
+ANGLES
+SI      Ob      SI      4.66    174.22
+Ob      SI      Ob      159.57  110.93
+Ob      SI      Os      153.26  111.09
+Os      SI      Os      89.62   116.26
+SI      Os      Hs      57.50   106.00
+SI      O       SI      4.66    174.22
+O      SI      O       159.57   110.93
+Ob     SI      SI         0.0   0.0
+
+DIHEDRALS
+
+NONBONDED
+!atom  ignored    epsilon      Rmin/2   ignored   eps,1-4       Rmin/2,1-4
+SI      0.0     -0.3000      2.1475      0.0     -0.3000      2.1475
+Ob      0.0     -0.1500      1.7500      0.0     -0.1500      1.7500
+Os      0.0     -0.1500      1.7700      0.0     -0.1500      1.7700
+Hs      0.0     -0.0460      0.2245      0.0     -0.0430      0.2245
+O       0.0     -0.1500      1.7500      0.0     -0.1500      1.7500
+
+HBOND CUTHB 0.5  ! If you want to do hbond analysis (only), then use
+                 ! READ PARAM APPEND CARD
+                 ! to append hbond parameters from the file: par_hbond.inp
+
+END
+

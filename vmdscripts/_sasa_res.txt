@@ -1,0 +1,58 @@
+SASA All Residue Calculator 1.2
+-------------------------------
+
+REQUIREMENTS: VMD Version 1.8.3 or greater
+
+CHANGELOG:
+        1.1 fixed some wrong variable names
+	1.2 fixed bug in internal representation of SASA values
+		worked correctly only for selection 0 - some value, otherwise
+		crashed
+		script is now using arrays instead of lists
+		
+DESCRIPTION:
+	Script for detailed SASA analysis. Calculates SASA for every residue
+	of a given selection (e.g. protein) ad prints it out. It can be used
+	to identify residues more/less exposed to the solvent. Works also 
+	for whole trajectories, were it calculates average SASA value.
+
+HOW IT WORKS:
+	Takes one frame after another. Splits given selection to single residues
+	and calculates SASA for each of them by using
+	measure sasa _radius_ _whole_sel_ -restrict _residue_
+	construct.
+	This procedure can be very time consuming (360 residue protein, 2000 frames
+	trajectory = 7 hours on 3GHz Athlon).
+	See the script itself for more information.
+
+PROCEDURES:
+	getAllResSASA - main procedure
+
+EXAMPLE USAGE AND OUTPUT:
+	usage:
+	getAllResSASA "selection" probe_radius <startframe <endframe>>
+	Optional startframe/endframe parameters define range of frames from
+	the trajectory, that should be analyzed. If omitted, whole trajectory
+	is parsed.
+	
+	example:
+	source _sasa_res.tcl
+	getAllResSASA "protein" 1.5 1 100
+	This performs the analysis on frames 1 to 100 of the trajectory and 
+	prints average SASA values for every residue of the protein to file
+	res_sasa.dat using following format
+	    residue resname SASA
+	i.e.,
+	    0 GLU 195.54
+	    1 THR 140.93
+	    2 THR 66.38
+	    3 ALA 7.58
+	    4 LEU 0.51
+	    5 VAL 0.59
+	    ...
+	
+DOWNLOAD FILE:
+	_sasa_res.tcl
+
+AUTHOR:
+	Lubos Vrbka (lubos (dot) vrbka (at) gmail (dot) com)
