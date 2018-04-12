@@ -1,0 +1,56 @@
+PSF
+
+       1 !NTITLE
+ REMARKS VMD generated structure x-plor psf file
+
+      16 !NATOM
+       1 U0     0  UNK  CT2  CT2    0.000000       12.0110
+       2 U0     0  UNK  CT2  CT2    0.000000       12.0110
+       3 U0     0  UNK  CT2  CT2    0.000000       12.0110
+       4 U0     0  UNK  CT2  CT2    0.000000       12.0110
+       5 U0     0  UNK  NH3  NH3    0.000000       14.0070
+       6 U0     0  UNK  HA   HA     0.000000        1.0080
+       7 U0     0  UNK  HA   HA     0.000000        1.0080
+       8 U0     0  UNK  HA   HA     0.000000        1.0080
+       9 U0     0  UNK  HA   HA     0.000000        1.0080
+      10 U0     0  UNK  HA   HA     0.000000        1.0080
+      11 U0     0  UNK  HA   HA     0.000000        1.0080
+      12 U0     0  UNK  HA   HA     0.000000        1.0080
+      13 U0     0  UNK  HA   HA     0.000000        1.0080
+      14 U0     0  UNK  HC   HC     0.430000        1.0079
+      15 U0     0  UNK  HC   HC     0.430000        1.0079
+      16 U0     0  UNK  HC   HC     0.430000        1.0079
+
+      15 !NBOND: bonds
+       1       2       1       6       1       7       2       3
+       2       8       2       9       3       4       3      10
+       3      11       4       5       4      12       4      13
+       5      14       5      15       5      16
+
+      27 !NTHETA: angles
+       2       1       6       2       1       7       6       1       7
+       1       2       3       1       2       8       1       2       9
+       3       2       8       3       2       9       8       2       9
+       2       3       4       2       3      10       2       3      11
+       4       3      10       4       3      11      10       3      11
+       3       4       5       3       4      12       3       4      13
+       5       4      12       5       4      13      12       4      13
+       4       5      14       4       5      15       4       5      16
+      14       5      15      14       5      16      15       5      16
+
+       9 !NPHI: dihedrals
+       1       2       3       4       1       2       3      10
+       1       2       3      11       2       3       4       5
+       2       3       4      12       2       3       4      13
+       3       4       5      14       3       4       5      15
+       3       4       5      16
+
+       0 !NIMPHI: impropers
+
+       0 !NDON: donors
+
+       0 !NACC: acceptors
+
+       0 !NNB
+       0       0       0       0       0       0       0       0
+       0       0       0       0       0       0       0       0

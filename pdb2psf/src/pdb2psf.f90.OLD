@@ -1,0 +1,416 @@
+module module_quick_pdb
+real,dimension(3)   ::  box_size
+real,dimension(3)   ::  box_inv
+!atom section
+character(len=6)    ::  RecordName
+integer             ::  serial
+character(len=4)    ::  name
+character(len=1)    ::  altloc
+character(len=3)    ::  resName
+character(len=1)    ::  chainID
+integer             ::  resSeq
+character(len=1)    ::  iCode
+!real,dimension(3)   ::  pos !replaces x,y,z
+real,allocatable    ::  pos(:,:)
+real                ::  occupancy
+real                ::  tempFactor
+integer             ::  natm
+end
+
+module module_atom_type
+character(len=3)    ::  psf_name
+character(len=3)    ::  psf_type
+real                ::  charge
+real                ::  mass
+integer,allocatable ::  ttype(:)
+integer,allocatable ::  bonds(:)
+integer             ::  nbonds
+integer,allocatable ::  angles(:)
+integer             ::  nangles
+integer,allocatable ::  dihedrals(:)
+integer             ::  ndihedrals
+end
+
+
+program pdb2psf
+use module_quick_pdb
+use module_atom_type
+use module_user_interface
+ ! bond type, angle type, dihedral type
+character(len=41)       :: bond_type,angle_type,dihedral_type
+
+    call user_interface
+
+    open(1,file=in)
+    open(2,file=out)
+    if(gmx_out/=" ") open(67,file=gmx_out)
+
+    CALL init_pdb(natm)
+    CALL psf_header(natm)
+    call quick_read_pdb
+
+nbonds=0    
+
+if(calc_bonds==0.and.psf_in/=" ")   then
+    write(*,"(a)") "Reading bonds from PSF file"
+    call readpsf_bonds
+endif
+
+if(calc_bonds==1)   then
+    write(*,"(a)") "Computing bonds from distance search "
+    if(periodic==0) call gen_bonds_nopbc(distance_cutoff)
+    if(periodic==1.and.sio==0) call gen_bonds(distance_cutoff)
+    if(periodic==1.and.sio==1) call gen_bonds_SIO(distance_cutoff)
+endif
+
+write(2,*)
+write(2,"(i8,a)") nbonds," !NBOND: bonds"
+if(nbonds/=0) write(2,"(8i8)"), bonds(1:nbonds*2)
+
+nangles=0
+ndihedrals=0
+if(calc_angles==1) then
+    if(nbonds==0) then 
+        print*, "Couldn't find any bonds, stopping program"
+        stop
+    endif
+    if(sio==0) call gen_angles
+    if(sio==1) call gen_angles_SIO
+endif
+
+write(2,*)
+write(2,"(i8,a)")nangles," !NTHETA: angles"
+if(nangles/=0) write(2,"(8i8)"), angles(1:nangles*3)
+write(2,*)
+write(2,*)
+write(2,"(i8,a)") ndihedrals," !NPHI: dihedrals"
+if(ndihedrals/=0) write(2,"(8i8)"), dihedrals(1:ndihedrals*4)
+write(2,*)
+
+    CALL psf_final(natm)
+
+close(1)
+close(2)
+
+
+! if(gmx_out/=" ") then
+!   write(67,*) "[ bonds ]"
+!   write(67,"(2i8)") bonds(1:nbonds*2)
+!   write(67,*) "[ angles ]"
+!   write(67,"(3i8)") angles(1:nangles*3)
+!   write(67,*) "[ dihedrals ]"
+!   write(67,"(4i8)") dihedrals(1:ndihedrals*4)
+!   close(67)
+! endif
+
+if(gmx_out/=" ") then
+!cycle bond types
+  write(67,*) "[ bonds ]"
+  write(67,*) ";  ai    aj funct            c0            c1            c2            c3"
+  do i=1,nbonds*2,2
+  bond_type="; undefined bond type                   "
+! SI - O
+    if (ttype( bonds(i) )==14.and.ttype( bonds(i+1) )==8)   bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+    if (ttype( bonds(i) )==8.and.ttype( bonds(i+1) )==14)   bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+! SI - Os
+    if (ttype( bonds(i) )==14.and.ttype( bonds(i+1) )==801) bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+    if (ttype( bonds(i) )==801.and.ttype( bonds(i+1) )==14) bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+! SI - Ob
+    if (ttype( bonds(i) )==14.and.ttype( bonds(i+1) )==802) bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+    if (ttype( bonds(i) )==802.and.ttype( bonds(i+1) )==14) bond_type="     2    gb_29 ;     0.1630  4.7200e+06"
+! Os - Hs    
+    if (ttype( bonds(i) )==801.and.ttype( bonds(i+1) )==101)  bond_type="     2    gb_1 ;      0.1000  1.5700e+07"
+    if (ttype( bonds(i) )==801.and.ttype( bonds(i+1) )==101)  bond_type="     2    gb_1 ;      0.1000  1.5700e+07"
+
+  write(67,"(2i8,a)") bonds(i:i+1), bond_type
+  enddo
+
+   write(67,*) "[ angles ]"
+   write(67,*) ";  ai    aj    ak funct            c0            c1            c2            c3"
+  do i=1,nangles*3,3
+  angle_type="; undefined angle type                  "
+! SI - O - SI
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==8.and.ttype( angles(i+2) )==14)    angle_type="     2    ga_40 ;     155.00     2215.00"
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==801.and.ttype( angles(i+2) )==14)  angle_type="     2    ga_40 ;     155.00     2215.00"
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==802.and.ttype( angles(i+2) )==14)  angle_type="     2    ga_40 ;     155.00     2215.00"
+! O - SI - O
+    if(ttype( angles(i) )==8.and.ttype( angles(i+1) )==14.and.ttype( angles(i+2) )==8)     angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==801.and.ttype( angles(i+1) )==14.and.ttype( angles(i+2) )==801) angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==801.and.ttype( angles(i+1) )==14.and.ttype( angles(i+2) )==802) angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==802.and.ttype( angles(i+1) )==14.and.ttype( angles(i+2) )==802) angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==802.and.ttype( angles(i+1) )==14.and.ttype( angles(i+2) )==801) angle_type="     2    ga_12 ;     109.50      450.00" 
+!SI - O - Hs
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==8.and.ttype( angles(i+2) )==101)     angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==801.and.ttype( angles(i+2) )==101)   angle_type="     2    ga_12 ;     109.50      450.00"
+    if(ttype( angles(i) )==14.and.ttype( angles(i+1) )==802.and.ttype( angles(i+2) )==101)   angle_type="     2    ga_12 ;     109.50      450.00"
+    write(67,"(3i8,a)") angles(i:i+2), angle_type
+  enddo
+
+  write(67,*) "[ dihedrals ]"
+  do i=1,ndihedrals*4,4
+  dihedral_type="; undefined dihedral type               "
+   if(ttype( dihedrals(i+2) )==801.and.ttype( dihedrals(i+3) )==101)   dihedral_type="     1    gd_11  ; 180.000       7.11    "
+   write(67,"(4i8,a)") dihedrals(i:i+3), dihedral_type
+  enddo
+endif
+  print*,
+END
+
+
+
+subroutine init_pdb
+use module_quick_pdb,only    : natm,RecordName,box_size,box_inv
+natm=0
+write(*,*) "Counting atoms"
+do  !count atoms
+    read(1,"(a6)",end=10,err=10) RecordName
+    if (RecordName=="CRYST1") then
+        backspace(1)
+        read(1,"(6x,3f9.3)") box_size
+    endif
+    if (RecordName=="ATOM  ".or.RecordName=="HETATM") then
+    natm=natm+1
+!mac    write(*,"(i8,a,$)") natm,"\r"
+    endif
+enddo
+10  rewind(1)
+print*
+
+do i=1,3 !box dimensions
+    if(box_size(i)/=0.0) box_inv(i)=1/box_size(i)
+    if(box_size(i)==0.0) box_inv(i)=0
+enddo
+
+do  !find first "ATOM" record
+    read(1,"(a6)") RecordName
+    if (RecordName=="ATOM  ".or.RecordName=="HETATM") then
+        backspace(1)
+        exit
+    endif
+enddo
+end
+
+subroutine quick_read_pdb
+use module_quick_pdb
+use module_atom_type
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+use module_user_interface
+character(len=72)       :: line  ! general string.
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+
+    ALLOCATE(pos(3,natm))
+    ALLOCATE(ttype(natm))
+
+write(*,*) "Writing PSF atoms :"
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+
+if(trim(psf_in)/="") then !read psf atom types etc
+  open(66,file=psf_in)
+  do while (line(11:15)/="NATOM") ; read(66,"(a72)") line ; enddo
+endif
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+
+do  i=1,natm    !read every atom  ! STORING POS()
+read(1,1000,err=20,end=20)                                  &
+                RecordName,serial,name,altloc,resName,      &
+                chainID,resSeq,iCode,pos(:,i),occupancy,    &
+                tempFactor
+
+!put your function here /start
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+if(trim(psf_in)/="") read(66,3000) serial,resSeq,resName,psf_name,psf_type,charge,mass
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+if(trim(psf_in)=="")   CALL atom_type_from_pdb(i,name)
+if(trim(psf_in)/="")   CALL atom_type(i) !TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+!mac    write(*,"(i8,a,$)") serial,"\r"
+    WRITE(2,2000) serial," U0",resSeq,resName,psf_name,psf_type,charge,mass
+!adicionado para priscila.
+
+  if(gmx_out/=" ")   WRITE(67,3001) serial,trim(adjustr(psf_type)),serial, &
+                     resName,trim(adjustr(name)),serial,charge,mass  !write gromacs top format
+
+!adicionado para priscila.
+!put your IF here /end
+enddo
+
+20  print*  
+    print*, " :) Thank you for using quick_pdb :) "
+
+1000    format(a6,i5,1x,a4,a1,a3,1x,a1,i4,a1,3x,3f8.3,2f6.2)    !pdb format
+2000    format(i8,a3,2x,i4,2x,a3,2x,a3,2x,a3,2x,f10.6,6x,f8.4)  !psf format
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+3000    format(i8,3x,2x,i4,2x,a3,2x,a3,2x,a3,2x,f10.6,6x,f8.4)  !psf format
+!TEST Wed Mar  3 17:19:49 BRT 2010  read atom names (types) from psf
+3001    format(i6,7x,a4,2x,i5,4x,a3,3x,a4,2x,i5,3x,f8.3,2x,f9.4) !write gromacs top format
+
+end
+
+
+subroutine atom_type(i)  !psf_name has only character(len=3
+use module_atom_type
+!    charge=0.0
+
+if ( psf_type(1:2)=="C  " )   then
+    psf_type="C  "
+    mass=12.0110
+    ttype(i)=6
+endif
+
+!oxygen    
+if ( psf_type(1:1)=="O" )   then
+    mass=15.9994
+    ttype(i)=8
+    charge=-0.500
+endif
+
+if ( psf_type(1:2)=="Os" )   then 
+    mass=15.9994
+    ttype(i)=801  !silanol oxygen
+    charge=-0.660
+endif
+
+if ( psf_type(1:2)=="Ob" )   then
+    mass=15.9994
+    ttype(i)=802  !bulk oxygen
+    charge=-0.450
+endif
+
+!hydrogen
+if ( psf_type(1:2)=="H " )   then
+    mass= 1.0080
+    ttype(i)=1 !default
+!    charge=0.000 ! default
+endif
+    
+if ( psf_type(1:2)=="Hs" )   then
+    mass= 1.0079
+    ttype(i)=101 !silanol hydrogen
+    charge=0.430
+endif
+
+if ( psf_type(1:2)=="Si".or.psf_type(1:2)=="SI") then
+    mass=28.0855
+    ttype(i)=14
+    charge=0.900
+endif
+
+if ( psf_type(1:2)=="S ") then
+    mass=32.0600
+    ttype(i)=16
+    charge=1.000
+endif
+
+! functional group atoms
+if ( psf_type(1:3)=="CT2" )   then
+    psf_type="CT2"
+    mass=12.0110
+    ttype(i)=601
+endif
+
+if ( psf_type(1:3)=="CD" )   then
+    psf_type="CD"
+    mass=12.0110
+    ttype(i)=603
+endif
+
+if ( psf_type(1:2)=="HA" )   then
+    psf_type="HA "
+    mass=1.0080
+    ttype(i)=104
+endif
+
+if ( psf_type(1:2)=="OB" )   then
+    psf_type="OB "
+    mass=15.9994
+    ttype(i)=811
+endif
+
+if ( psf_type(1:3)=="OH1" )   then
+    psf_type="OH1"
+    mass=15.9994
+    ttype(i)=812
+endif
+
+
+
+end
+
+
+subroutine atom_type_from_pdb(i,name)
+use module_atom_type
+character(len=4)    ::  name
+    charge=0.0
+    name=trim(adjustl(name))
+    psf_name=name(1:3)
+
+if ( name(1:1)=="C" )   then
+    psf_type="C  "
+    mass=12.0110
+    ttype(i)=6
+endif
+    
+if ( name(1:1)=="O" )   then
+    psf_type="O  "
+    mass=15.9994
+    ttype(i)=8
+!    charge=-0.500
+endif
+
+if ( name(1:1)=="H" )   then
+    psf_type="H  "
+    mass= 1.0079
+    ttype(i)=1
+endif
+    
+if ( name(1:2)=="Si".or.name(1:2)=="SI") then
+    psf_type="SI "
+    mass=28.0855
+    ttype(i)=14
+!    charge=1.000
+endif
+
+if ( name(1:2)=="S ") then
+    psf_type="S  "
+    mass=32.0600
+    ttype(i)=16
+    charge=1.000
+endif
+
+
+end
+
+subroutine psf_header(natm)
+write(2,"(a)")"PSF"
+write(2,"(a)")
+write(2,"(a)")"       1 !NTITLE"
+write(2,"(a)")" REMARKS VMD generated structure x-plor psf file"
+write(2,"(a)")
+write(2,"(i8,a)") natm," !NATOM"
+end
+
+subroutine psf_final(natm)
+!write rest of the PSF file
+write(2,"(a)")"       0 !NIMPHI: impropers"
+write(2,*)
+write(2,"(a)")"       0 !NDON: donors"
+write(2,*)
+write(2,"(a)")"       0 !NACC: acceptors"
+write(2,*)
+write(2,"(a)")"       0 !NNB"
+write(2,"(8i8)") (0,j=1,natm)
+end
+
+! ##### FUNCTIONS ##### FUNCTIONS ##### FUNCTIONS
+function dist_nopbc(i,j)
+    real,dimension(3) :: i,j,vd
+    vd = i - j
+    dist_nopbc = dot_product(vd,vd)
+end
+
+function dist(i,j,box_inv,box_size)
+    real,dimension(3) :: i,j,vd,box_inv,box_size
+    vd = i - j
+    vd = vd - anint(vd * box_inv) * box_size
+    dist = dot_product(vd,vd)
+end
+! ##### FUNCTIONS ##### FUNCTIONS ##### FUNCTIONS

@@ -1,0 +1,6 @@
+# nao fiz nada ainda com o 12.1p1
+# preciso arrumar a parte do -psftype
+
+1) pdb2psf_11 eh uma revisao do codigo.
+2) As versoe acima da versao v9beta ficaram quebradas.
+3) 
